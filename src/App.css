@@ -182,3 +182,175 @@
     border-right-color: var(--border);
   }
 }
+
+/* --- Investing Terminal professional dashboard styles --- */
+:root {
+  --bg: #050610;
+  --panel: #0f1724;
+  --muted: #9aa8c7;
+  --border: #1e2a3a;
+  --accent: #9fbafb;
+  --gain: #2ecc71;
+  --loss: #ff6b6b;
+  --focus: #4f8cff;
+}
+
+.terminal-app {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--bg), #070a12 120%);
+  color: #e6eef8;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing: antialiased;
+  padding: 22px;
+  box-sizing: border-box;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 8px;
+  margin: 0 auto 18px;
+  max-width: 1200px;
+}
+
+.wordmark {
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #eaf3ff;
+  font-size: 14px;
+}
+
+.top-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.live-status {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.01);
+  border: 1px solid rgba(255,255,255,0.02);
+}
+
+.search {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.search input {
+  width: 220px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #0b1220;
+  color: #e6eef8;
+  font-size: 14px;
+}
+
+.search input:focus {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #061226;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.status.error { color: var(--loss); margin: 12px 0; }
+
+.panel, .search-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 10px rgba(2,6,23,0.6);
+}
+
+.search-panel { max-width: 1200px; margin: 6px auto 18px; }
+.panel-label { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+.search-row { display:flex; align-items:center; gap:16px; }
+.search-price { font-size: 22px; font-weight:700; }
+.change { font-weight:600; }
+.change.positive { color: var(--gain); }
+.change.negative { color: var(--loss); }
+
+.markets {
+  max-width: 1200px;
+  margin: 0 auto 18px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.market-card {
+  padding: 12px;
+  border-radius: 10px;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.market-card:focus, .market-card:hover { transform: translateY(-4px); box-shadow: 0 6px 24px rgba(2,6,23,0.6); outline: none; }
+.market-card .m-label { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+.market-card .m-value { font-size: 20px; font-weight: 700; }
+.market-card .m-change { font-size: 13px; margin-top: 6px; }
+.market-card.positive .m-change { color: var(--gain); }
+.market-card.negative .m-change { color: var(--loss); }
+.market-card.skeleton { opacity: 0.6; }
+
+.panels {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 14px;
+}
+
+.panel-header h2 { margin: 0; font-size: 16px; }
+.panel-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+.movers-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.movers-table th { text-align:left; color:var(--muted); font-size:12px; padding-bottom:8px; }
+.movers-table td, .movers-table th { padding: 10px 8px; border-bottom: 1px solid var(--border); }
+.movers-table tr { transition: background 120ms ease; }
+.movers-table tr:hover, .movers-table tr:focus { background: rgba(255,255,255,0.02); outline: none; }
+.movers-table .symbol { font-weight:700; }
+.movers-table .company { color: var(--muted); font-size: 12px; }
+.empty { color: var(--muted); padding: 14px; }
+
+.earnings-list { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+.earning { display:flex; justify-content:space-between; gap:12px; padding:10px; border-radius:8px; transition: background 120ms ease; }
+.earning:hover, .earning:focus { background: rgba(255,255,255,0.02); }
+.e-left .symbol { font-weight:700; }
+.e-left .company { color: var(--muted); font-size: 13px; }
+
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+@media (max-width: 880px) {
+  .markets { grid-template-columns: repeat(2, 1fr); }
+  .panels { grid-template-columns: 1fr; }
+  .search input { width: 140px; }
+}
+
+@media (max-width: 520px) {
+  .topbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .search input { width: 100%; }
+}
+
+/* subtle skeleton animation for loading placeholders */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0.6; }
+}
+.skeleton { animation: pulse 1.6s ease-in-out infinite; }
