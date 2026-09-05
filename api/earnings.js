@@ -20,6 +20,7 @@ export default async function handler(request, response) {
 
     const upcoming = (data.earningsCalendar || [])
       .filter((item) => item.symbol && item.date >= dateOnly(today))
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
       .slice(0, 5);
 
     response.setHeader("Cache-Control", "s-maxage=3600");

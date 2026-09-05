@@ -232,7 +232,7 @@ const movers = liveMovers.length > 0
 
         <section className="grid">
           <div className="card">
-            <h2>BIGGEST MOVERS<span className="company">TOP 100 · % MOVE</span></h2>
+            <h2>BIGGEST MOVERS</h2>
             <table>
               <thead>
                 <tr><th>STOCK</th><th>PRICE</th><th>CHANGE</th></tr>

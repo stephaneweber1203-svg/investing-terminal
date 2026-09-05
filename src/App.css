@@ -523,3 +523,19 @@ body table tr:focus { outline: 2px solid rgba(66,140,255,0.12); }
   body .markets { grid-template-columns: 1fr 1fr !important; gap:10px !important; }
   body .value { font-size: 18px !important; }
 }
+
+/* Emphasize market labels and h2 headings (exact selectors used in App.jsx) */
+body .markets .label {
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  color: #f6fbff !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+}
+
+body h2 {
+  color: #f6fbff !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  margin-bottom: 10px !important;
+}
