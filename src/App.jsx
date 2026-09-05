@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./App.css";
 
 const marketCards = [
   { symbol: "^GSPC", name: "S&P 500", value: "5,248.49", change: "+0.8%" },
