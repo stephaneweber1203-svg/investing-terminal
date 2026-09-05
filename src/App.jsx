@@ -1,0 +1,115 @@
+import { useState } from "react";
+
+const marketData = [
+  { name: "S&P 500", value: "5,248.49", change: "+0.8%", positive: true },
+  { name: "NASDAQ", value: "16,428.82", change: "+1.2%", positive: true },
+  { name: "DOW", value: "38,778.10", change: "+0.5%", positive: true },
+  { name: "VIX", value: "14.22", change: "-2.1%", positive: false },
+];
+
+const movers = [
+  ["NVDA", "NVIDIA", "$118.42", "+5.84%"],
+  ["TSLA", "Tesla", "$176.21", "+3.17%"],
+  ["AAPL", "Apple", "$189.98", "+1.42%"],
+  ["AMD", "AMD", "$164.09", "-1.26%"],
+  ["META", "Meta", "$493.50", "-2.04%"],
+];
+
+const earnings = [
+  ["NVIDIA", "NVDA", "Today, after close"],
+  ["Apple", "AAPL", "Tomorrow, after close"],
+  ["Tesla", "TSLA", "Aug 14, after close"],
+  ["Disney", "DIS", "Aug 15, before open"],
+  ["Walmart", "WMT", "Aug 15, before open"],
+];
+
+export default function App() {
+  const [search, setSearch] = useState("");
+
+  return (
+    <>
+      <style>{`
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #0b1020; color: #edf2ff; font-family: Arial, sans-serif; }
+        #root { min-height: 100vh; }
+        .app { max-width: 1200px; margin: auto; padding: 24px; }
+        header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 28px; }
+        h1 { margin: 0; font-size: 22px; letter-spacing: 1px; }
+        input { width: 240px; background: #151c31; border: 1px solid #2b3555; border-radius: 8px; color: white; padding: 11px 14px; }
+        .markets, .grid { display: grid; gap: 16px; }
+        .markets { grid-template-columns: repeat(4, 1fr); margin-bottom: 24px; }
+        .grid { grid-template-columns: 1.2fr 1fr; }
+        .card { background: #151c31; border: 1px solid #27314f; border-radius: 12px; padding: 18px; }
+        .label { color: #9aa8c7; font-size: 13px; margin-bottom: 10px; }
+        .value { font-size: 24px; font-weight: bold; }
+        .gain { color: #4ade80; } .loss { color: #fb7185; }
+        h2 { margin: 0 0 16px; font-size: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        td, th { padding: 12px 4px; text-align: left; border-bottom: 1px solid #27314f; }
+        th { color: #9aa8c7; font-size: 12px; }
+        .symbol { font-weight: bold; } .company { color: #9aa8c7; font-size: 13px; }
+        .earning { padding: 12px 0; border-bottom: 1px solid #27314f; }
+        .earning:last-child, tr:last-child td { border-bottom: 0; }
+        @media (max-width: 760px) {
+          header { align-items: flex-start; flex-direction: column; }
+          input { width: 100%; }
+          .markets, .grid { grid-template-columns: 1fr 1fr; }
+          .grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <main className="app">
+        <header>
+          <h1>INVESTING TERMINAL</h1>
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search stocks..."
+          />
+        </header>
+
+        <section className="markets">
+          {marketData.map((market) => (
+            <div className="card" key={market.name}>
+              <div className="label">{market.name}</div>
+              <div className="value">{market.value}</div>
+              <div className={market.positive ? "gain" : "loss"}>{market.change} today</div>
+            </div>
+          ))}
+        </section>
+
+        <section className="grid">
+          <div className="card">
+            <h2>BIGGEST MOVERS</h2>
+            <table>
+              <thead>
+                <tr><th>STOCK</th><th>PRICE</th><th>CHANGE</th></tr>
+              </thead>
+              <tbody>
+                {movers
+                  .filter((stock) => stock.join(" ").toLowerCase().includes(search.toLowerCase()))
+                  .map(([symbol, company, price, change]) => (
+                    <tr key={symbol}>
+                      <td><div className="symbol">{symbol}</div><div className="company">{company}</div></td>
+                      <td>{price}</td>
+                      <td className={change.startsWith("+") ? "gain" : "loss"}>{change}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="card">
+            <h2>UPCOMING EARNINGS</h2>
+            {earnings.map(([company, symbol, date]) => (
+              <div className="earning" key={symbol}>
+                <div className="symbol">{company} <span className="company">({symbol})</span></div>
+                <div className="company">{date}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+    </>
+  );
+}
