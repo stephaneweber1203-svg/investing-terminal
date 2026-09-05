@@ -42,7 +42,7 @@ export default function App() {
   const [searchResult, setSearchResult] = useState(null);
   const [searchStatus, setSearchStatus] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-
+  const [upcomingEarnings, setUpcomingEarnings] = useState(earnings);
   useEffect(() => {
     async function loadMarketData() {
       try {
@@ -58,6 +58,36 @@ export default function App() {
     }
 
     loadMarketData();
+    async function loadEarnings() {
+  try {
+    const result = await fetch("/api/earnings");
+    if (!result.ok) throw new Error();
+
+    const data = await result.json();
+
+    if (data.earnings?.length) {
+      setUpcomingEarnings(
+        data.earnings.map((item) => {
+          const date = new Date(`${item.date}T12:00:00`).toLocaleDateString(
+            "en-US",
+            { month: "short", day: "numeric" }
+          );
+
+          const time =
+            item.hour === "bmo" ? "Before open" :
+            item.hour === "amc" ? "After close" :
+            "During market hours";
+
+          return [item.symbol, item.symbol, `${date} · ${time}`];
+        })
+      );
+    }
+  } catch {
+    // Keep the example list if the live calendar is temporarily unavailable.
+  }
+}
+
+loadEarnings();
   }, []);
 
   async function handleSearch(event) {
@@ -101,20 +131,25 @@ export default function App() {
     };
   });
 
-  const movers = stockList.map((stock) => {
-    const quote = quotes[stock.symbol];
+  const liveMovers = Object.entries(quotes)
+  .filter(([symbol, quote]) => !symbol.startsWith("^") && quote?.c && Number.isFinite(quote.dp))
+  .map(([symbol, quote]) => ({
+    symbol,
+    company: "Top 100 market-cap universe",
+    price: formatPrice(quote.c),
+    change: formatChange(quote.dp),
+    changeValue: quote.dp,
+    positive: quote.dp >= 0,
+  }))
+  .sort((first, second) => Math.abs(second.changeValue) - Math.abs(first.changeValue))
+  .slice(0, 5);
 
-    if (!quote?.c) {
-      return { ...stock, positive: stock.change.startsWith("+") };
-    }
-
-    return {
+const movers = liveMovers.length > 0
+  ? liveMovers
+  : stockList.map((stock) => ({
       ...stock,
-      price: formatPrice(quote.c),
-      change: formatChange(quote.dp),
-      positive: quote.dp >= 0,
-    };
-  });
+      positive: stock.change.startsWith("+"),
+    }));
 
   return (
     <>
@@ -195,7 +230,7 @@ export default function App() {
 
         <section className="grid">
           <div className="card">
-            <h2>BIGGEST MOVERS</h2>
+            <h2>BIGGEST MOVERS<span className="company">TOP 100 · % MOVE</span></h2>
             <table>
               <thead>
                 <tr><th>STOCK</th><th>PRICE</th><th>CHANGE</th></tr>
@@ -219,7 +254,7 @@ export default function App() {
 
           <div className="card">
             <h2>UPCOMING EARNINGS</h2>
-            {earnings.map(([company, symbol, date]) => (
+            {upcomingEarnings.map(([company, symbol, date]) => (
               <div className="earning" key={symbol}>
                 <div className="symbol">
                   {company} <span className="company">({symbol})</span>
