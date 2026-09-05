@@ -151,6 +151,7 @@ const movers = liveMovers.length > 0
       positive: stock.change.startsWith("+"),
     }));
 
+
   return (
     <>
       <style>{`
