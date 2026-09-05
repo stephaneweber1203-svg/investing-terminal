@@ -368,3 +368,158 @@
   100% { opacity: 0.6; }
 }
 .skeleton { animation: pulse 1.6s ease-in-out infinite; }
+
+/* High-specificity overrides for the existing App JSX classes
+   - Targets the exact class names used in src/App.jsx
+   - Uses body-scoped selectors to outrank simpler rules in the inline <style>
+   - Keeps layout, JS, and data-fetching unchanged
+*/
+
+body .app {
+  max-width: 1200px;
+  margin: 18px auto;
+  padding: 20px;
+  background: linear-gradient(180deg, rgba(8,16,28,0.4), transparent 60%);
+  box-sizing: border-box;
+  color: #e9f2ff;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+}
+
+body header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+body h1 {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: #eaf4ff;
+  font-weight: 700;
+}
+
+body .search {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+body .search input,
+body input {
+  width: 220px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  background: rgba(255,255,255,0.02) !important;
+  color: #eaf4ff !important;
+  font-size: 14px;
+  transition: box-shadow 120ms ease, border-color 120ms ease;
+}
+
+body input:focus,
+body .search input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66,140,255,0.12);
+  border-color: rgba(66,140,255,0.6) !important;
+}
+
+body button,
+body .search button {
+  background: linear-gradient(180deg, #7fb8ff, #4d8fe6);
+  color: #042033;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.12);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+body button:active,
+body .search button:active { transform: translateY(1px); }
+body button:focus-visible,
+body .search button:focus-visible { box-shadow: 0 0 0 3px rgba(66,140,255,0.16); outline: none; }
+
+body .status {
+  color: #9fb3c8;
+  font-size: 13px;
+  margin: 6px 0 18px !important;
+}
+
+body .status.loss { color: var(--loss); }
+
+body .card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.03);
+  border-radius: 12px;
+  padding: 16px !important;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.5);
+}
+
+body .search-card { margin-bottom: 18px !important; }
+
+body .search-price {
+  font-size: 26px !important;
+  font-weight: 800;
+  margin: 6px 0 !important;
+}
+
+body .markets, body .grid {
+  display: grid !important;
+  gap: 14px !important;
+}
+
+body .markets { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; margin-bottom: 18px !important; }
+
+body .grid { grid-template-columns: 1.2fr 1fr !important; }
+
+body .label {
+  color: #9fb3c8 !important;
+  font-size: 13px !important;
+  margin-bottom: 8px !important;
+}
+
+body .value {
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+body .gain { color: var(--gain) !important; font-weight:700; }
+body .loss { color: var(--loss) !important; font-weight:700; }
+
+body h2 { margin: 0 0 12px; font-size: 16px; font-weight:700; }
+
+body table { width: 100% !important; border-collapse: collapse !important; }
+body td, body th {
+  padding: 10px 8px !important;
+  text-align: left !important;
+  border-bottom: 1px solid rgba(255,255,255,0.035) !important;
+}
+
+body th { color: #9fb3c8 !important; font-size: 12px !important; font-weight:600; }
+
+body .symbol { font-weight: 800 !important; }
+body .company { color: #9fb3c8 !important; font-size: 13px !important; }
+
+body .earning { padding: 10px 0 !important; border-bottom: 1px solid rgba(255,255,255,0.03) !important; display:flex; justify-content:space-between; align-items:center; }
+body .earning:last-child { border-bottom: 0 !important; }
+
+/* Hover and focus states for rows and cards */
+body .card:hover, body table tr:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(2,6,23,0.45); }
+body table tr:focus { outline: 2px solid rgba(66,140,255,0.12); }
+
+/* Responsive adjustments */
+@media (max-width: 760px) {
+  body header { align-items: flex-start; flex-direction: column; }
+  body .search, body input { width: 100% !important; }
+  body .markets { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  body .grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 420px) {
+  body .markets { grid-template-columns: 1fr 1fr !important; gap:10px !important; }
+  body .value { font-size: 18px !important; }
+}
