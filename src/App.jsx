@@ -1,30 +1,97 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const marketData = [
-  { name: "S&P 500", value: "5,248.49", change: "+0.8%", positive: true },
-  { name: "NASDAQ", value: "16,428.82", change: "+1.2%", positive: true },
-  { name: "DOW", value: "38,778.10", change: "+0.5%", positive: true },
-  { name: "VIX", value: "14.22", change: "-2.1%", positive: false },
+const marketCards = [
+  { symbol: "^GSPC", name: "S&P 500", value: "5,248.49", change: "+0.8%" },
+  { symbol: "^IXIC", name: "NASDAQ", value: "16,428.82", change: "+1.2%" },
+  { symbol: "^DJI", name: "DOW", value: "38,778.10", change: "+0.5%" },
+  { symbol: "^VIX", name: "VIX", value: "14.22", change: "-2.1%" },
 ];
 
-const movers = [
-  ["NVDA", "NVIDIA", "$118.42", "+5.84%"],
-  ["TSLA", "Tesla", "$176.21", "+3.17%"],
-  ["AAPL", "Apple", "$189.98", "+1.42%"],
-  ["AMD", "AMD", "$164.09", "-1.26%"],
-  ["META", "Meta", "$493.50", "-2.04%"],
+const stockList = [
+  { symbol: "NVDA", company: "NVIDIA", price: "$118.42", change: "+5.84%" },
+  { symbol: "TSLA", company: "Tesla", price: "$176.21", change: "+3.17%" },
+  { symbol: "AAPL", company: "Apple", price: "$189.98", change: "+1.42%" },
+  { symbol: "AMD", company: "AMD", price: "$164.09", change: "-1.26%" },
+  { symbol: "META", company: "Meta", price: "$493.50", change: "-2.04%" },
 ];
 
 const earnings = [
   ["NVIDIA", "NVDA", "Today, after close"],
   ["Apple", "AAPL", "Tomorrow, after close"],
-  ["Tesla", "TSLA", "Aug 14, after close"],
-  ["Disney", "DIS", "Aug 15, before open"],
-  ["Walmart", "WMT", "Aug 15, before open"],
+  ["Tesla", "TSLA", "Coming soon"],
+  ["Disney", "DIS", "Coming soon"],
+  ["Walmart", "WMT", "Coming soon"],
 ];
+
+function formatPrice(value) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function formatChange(value) {
+  return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
+}
 
 export default function App() {
   const [search, setSearch] = useState("");
+  const [quotes, setQuotes] = useState({});
+  const [dataStatus, setDataStatus] = useState("Loading live data…");
+
+  useEffect(() => {
+    async function loadMarketData() {
+      try {
+        const result = await fetch("/api/market");
+        if (!result.ok) throw new Error("Market data unavailable");
+
+        const data = await result.json();
+        setQuotes(data.quotes);
+        setDataStatus(`Live data · Updated ${new Date(data.updatedAt).toLocaleTimeString()}`);
+      } catch {
+        setDataStatus("Showing example data");
+      }
+    }
+
+    loadMarketData();
+  }, []);
+
+  const markets = marketCards.map((market) => {
+    const quote = quotes[market.symbol];
+
+    if (!quote?.c) {
+      return { ...market, positive: market.change.startsWith("+") };
+    }
+
+    return {
+      ...market,
+      value: market.symbol === "^VIX"
+        ? quote.c.toFixed(2)
+        : new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(quote.c),
+      change: formatChange(quote.dp),
+      positive: quote.dp >= 0,
+    };
+  });
+
+  const movers = stockList.map((stock) => {
+    const quote = quotes[stock.symbol];
+
+    if (!quote?.c) {
+      return { ...stock, positive: stock.change.startsWith("+") };
+    }
+
+    return {
+      ...stock,
+      price: formatPrice(quote.c),
+      change: formatChange(quote.dp),
+      positive: quote.dp >= 0,
+    };
+  });
+
+  const filteredMovers = movers.filter((stock) =>
+    `${stock.symbol} ${stock.company}`.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <>
@@ -36,6 +103,7 @@ export default function App() {
         header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 28px; }
         h1 { margin: 0; font-size: 22px; letter-spacing: 1px; }
         input { width: 240px; background: #151c31; border: 1px solid #2b3555; border-radius: 8px; color: white; padding: 11px 14px; }
+        .status { color: #9aa8c7; font-size: 13px; margin: -14px 0 22px; }
         .markets, .grid { display: grid; gap: 16px; }
         .markets { grid-template-columns: repeat(4, 1fr); margin-bottom: 24px; }
         .grid { grid-template-columns: 1.2fr 1fr; }
@@ -53,7 +121,7 @@ export default function App() {
         @media (max-width: 760px) {
           header { align-items: flex-start; flex-direction: column; }
           input { width: 100%; }
-          .markets, .grid { grid-template-columns: 1fr 1fr; }
+          .markets { grid-template-columns: 1fr 1fr; }
           .grid { grid-template-columns: 1fr; }
         }
       `}</style>
@@ -68,12 +136,16 @@ export default function App() {
           />
         </header>
 
+        <div className="status">{dataStatus}</div>
+
         <section className="markets">
-          {marketData.map((market) => (
+          {markets.map((market) => (
             <div className="card" key={market.name}>
               <div className="label">{market.name}</div>
               <div className="value">{market.value}</div>
-              <div className={market.positive ? "gain" : "loss"}>{market.change} today</div>
+              <div className={market.positive ? "gain" : "loss"}>
+                {market.change} today
+              </div>
             </div>
           ))}
         </section>
@@ -86,15 +158,18 @@ export default function App() {
                 <tr><th>STOCK</th><th>PRICE</th><th>CHANGE</th></tr>
               </thead>
               <tbody>
-                {movers
-                  .filter((stock) => stock.join(" ").toLowerCase().includes(search.toLowerCase()))
-                  .map(([symbol, company, price, change]) => (
-                    <tr key={symbol}>
-                      <td><div className="symbol">{symbol}</div><div className="company">{company}</div></td>
-                      <td>{price}</td>
-                      <td className={change.startsWith("+") ? "gain" : "loss"}>{change}</td>
-                    </tr>
-                  ))}
+                {filteredMovers.map((stock) => (
+                  <tr key={stock.symbol}>
+                    <td>
+                      <div className="symbol">{stock.symbol}</div>
+                      <div className="company">{stock.company}</div>
+                    </td>
+                    <td>{stock.price}</td>
+                    <td className={stock.positive ? "gain" : "loss"}>
+                      {stock.change}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -103,7 +178,9 @@ export default function App() {
             <h2>UPCOMING EARNINGS</h2>
             {earnings.map(([company, symbol, date]) => (
               <div className="earning" key={symbol}>
-                <div className="symbol">{company} <span className="company">({symbol})</span></div>
+                <div className="symbol">
+                  {company} <span className="company">({symbol})</span>
+                </div>
                 <div className="company">{date}</div>
               </div>
             ))}
