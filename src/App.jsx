@@ -39,12 +39,15 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [quotes, setQuotes] = useState({});
   const [dataStatus, setDataStatus] = useState("Loading live data…");
+  const [searchResult, setSearchResult] = useState(null);
+  const [searchStatus, setSearchStatus] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     async function loadMarketData() {
       try {
         const result = await fetch("/api/market");
-        if (!result.ok) throw new Error("Market data unavailable");
+        if (!result.ok) throw new Error();
 
         const data = await result.json();
         setQuotes(data.quotes);
@@ -56,6 +59,30 @@ export default function App() {
 
     loadMarketData();
   }, []);
+
+  async function handleSearch(event) {
+    event.preventDefault();
+
+    const symbol = search.trim().toUpperCase();
+    if (!symbol) return;
+
+    setIsSearching(true);
+    setSearchResult(null);
+    setSearchStatus("");
+
+    try {
+      const result = await fetch(`/api/quote?symbol=${encodeURIComponent(symbol)}`);
+      const data = await result.json();
+
+      if (!result.ok) throw new Error(data.error || "Could not find this stock.");
+
+      setSearchResult(data);
+    } catch (error) {
+      setSearchStatus(error.message);
+    } finally {
+      setIsSearching(false);
+    }
+  }
 
   const markets = marketCards.map((market) => {
     const quote = quotes[market.symbol];
@@ -89,10 +116,6 @@ export default function App() {
     };
   });
 
-  const filteredMovers = movers.filter((stock) =>
-    `${stock.symbol} ${stock.company}`.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
     <>
       <style>{`
@@ -102,8 +125,12 @@ export default function App() {
         .app { max-width: 1200px; margin: auto; padding: 24px; }
         header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 28px; }
         h1 { margin: 0; font-size: 22px; letter-spacing: 1px; }
-        input { width: 240px; background: #151c31; border: 1px solid #2b3555; border-radius: 8px; color: white; padding: 11px 14px; }
+        .search { display: flex; gap: 8px; }
+        input { width: 220px; background: #151c31; border: 1px solid #2b3555; border-radius: 8px; color: white; padding: 11px 14px; }
+        button { background: #4ade80; border: 0; border-radius: 8px; color: #06120b; cursor: pointer; font-weight: bold; padding: 11px 14px; }
         .status { color: #9aa8c7; font-size: 13px; margin: -14px 0 22px; }
+        .search-card { margin-bottom: 24px; }
+        .search-price { font-size: 28px; font-weight: bold; margin: 8px 0; }
         .markets, .grid { display: grid; gap: 16px; }
         .markets { grid-template-columns: repeat(4, 1fr); margin-bottom: 24px; }
         .grid { grid-template-columns: 1.2fr 1fr; }
@@ -120,7 +147,7 @@ export default function App() {
         .earning:last-child, tr:last-child td { border-bottom: 0; }
         @media (max-width: 760px) {
           header { align-items: flex-start; flex-direction: column; }
-          input { width: 100%; }
+          .search, input { width: 100%; }
           .markets { grid-template-columns: 1fr 1fr; }
           .grid { grid-template-columns: 1fr; }
         }
@@ -129,14 +156,30 @@ export default function App() {
       <main className="app">
         <header>
           <h1>INVESTING TERMINAL</h1>
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search stocks..."
-          />
+
+          <form className="search" onSubmit={handleSearch}>
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Enter a ticker, e.g. MSFT"
+            />
+            <button type="submit">{isSearching ? "Searching…" : "Search"}</button>
+          </form>
         </header>
 
         <div className="status">{dataStatus}</div>
+
+        {searchStatus && <div className="status loss">{searchStatus}</div>}
+
+        {searchResult && (
+          <section className="card search-card">
+            <div className="label">SEARCH RESULT · {searchResult.symbol}</div>
+            <div className="search-price">{formatPrice(searchResult.quote.c)}</div>
+            <div className={searchResult.quote.dp >= 0 ? "gain" : "loss"}>
+              {formatChange(searchResult.quote.dp)} today
+            </div>
+          </section>
+        )}
 
         <section className="markets">
           {markets.map((market) => (
@@ -158,7 +201,7 @@ export default function App() {
                 <tr><th>STOCK</th><th>PRICE</th><th>CHANGE</th></tr>
               </thead>
               <tbody>
-                {filteredMovers.map((stock) => (
+                {movers.map((stock) => (
                   <tr key={stock.symbol}>
                     <td>
                       <div className="symbol">{stock.symbol}</div>
@@ -190,3 +233,4 @@ export default function App() {
     </>
   );
 }
+
